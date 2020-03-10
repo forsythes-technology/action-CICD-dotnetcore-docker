@@ -4,14 +4,17 @@ inputs:
   CREATE_RELEASE:  
     description: 'If true, this build will be sent to Octopus, otherwise it will only be tested'
     required: true
+  PROJECTS:
+    description: 'e.g. MyProject or MyProject,MyOtherProject, must be included if CREATE_RELEASE is true'
+    required: false
   OCTOPUS_URL:  
     description: 'Octopus url'
     required: false
   OCTOPUS_APIKEY:  
     description: 'Api Key'
     required: false
-  SOLUTION_FILE:  
-    description: 'The .sln file to be built'
+  OCTOPUS_PROJECT:  
+    description: 'The Octopus project that will be deployed to'
     required: false 
   DEPLOY_TO:  
     description: 'If set, Octopus will attempt to auomtatically deploy to this environment'
