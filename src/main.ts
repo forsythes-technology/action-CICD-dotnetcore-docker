@@ -9,7 +9,7 @@ async function main() {
 		const createReleaseInput: string = core.getInput("CREATE_RELEASE", { required: true });
 		const octopusUrl: string = core.getInput("OCTOPUS_URL", { required: false });
 		const octopusApiKey: string = core.getInput("OCTOPUS_APIKEY", { required: false });
-		const solutionFile = core.getInput("SOLUTION_FILE", { required: true });
+		const solutionFile = core.getInput("SOLUTION_FILE", { required: false });
 		const project: string = core.getInput("PROJECT", { required: false });
 		const deployTo: string = core.getInput("DEPLOY_TO", { required: false });
 		const msTeamsWebhook: string = core.getInput("MS_TEAMS_WEBHOOK", { required: false });

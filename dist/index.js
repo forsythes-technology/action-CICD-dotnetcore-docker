@@ -4037,7 +4037,7 @@ function main() {
             const createReleaseInput = core.getInput("CREATE_RELEASE", { required: true });
             const octopusUrl = core.getInput("OCTOPUS_URL", { required: false });
             const octopusApiKey = core.getInput("OCTOPUS_APIKEY", { required: false });
-            const solutionFile = core.getInput("SOLUTION_FILE", { required: true });
+            const solutionFile = core.getInput("SOLUTION_FILE", { required: false });
             const project = core.getInput("PROJECT", { required: false });
             const deployTo = core.getInput("DEPLOY_TO", { required: false });
             const msTeamsWebhook = core.getInput("MS_TEAMS_WEBHOOK", { required: false });
