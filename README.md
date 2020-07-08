@@ -2,6 +2,15 @@
 
 This action creates an Octopus Release given a DotNet Core solution.
 
+# Building
+
+This action's build is committed to source, consequently it must be built locally for changes to take effect.
+You can build the solution using:
+```
+yarn build
+```
+
+
 # Usage
 ```
 
