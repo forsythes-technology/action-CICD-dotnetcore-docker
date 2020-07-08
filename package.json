@@ -1,6 +1,6 @@
 {
     "name": "action-CICD-dotnetCore",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "GitHub Action to deploy a DotNet Core solution to Octopus",
     "main": "dist/index.js",
     "scripts": {

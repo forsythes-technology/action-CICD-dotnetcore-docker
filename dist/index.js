@@ -4064,14 +4064,16 @@ function main() {
                 core.info(`🐙 Deploying projects ${projectsInput} (Version ${version}) to Octopus `);
                 core.info("Installing octopus cli...");
                 yield exec_1.exec(`dotnet tool install octopus.dotnet.cli --tool-path .`);
-                projects.forEach((project, index) => __awaiter(this, void 0, void 0, function* () {
-                    const counter = `(${index}/${projects.length})`;
+                // generate a package for each project and push to Octopus
+                for (let i = 0; i < projects.length; i++) {
+                    const project = projects[i];
+                    const counter = `(${i}/${projects.length})`;
                     core.info(project);
                     core.info(`${counter} Packing...`);
                     yield exec_1.exec(`.\\dotnet-octo pack --id=${project} --outFolder=${project}\\artifacts --basePath=${project}\\output --version=${version}`);
                     core.info(`${counter} Push to Octopus...`);
                     yield exec_1.exec(`.\\dotnet-octo push --package=${project}\\artifacts\\${project}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
-                }));
+                }
                 core.info("Creating Release...");
                 const deployToString = deployTo ? `--deployTo=${deployTo}` : "";
                 yield exec_1.exec(`.\\dotnet-octo create-release --project=${projectName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey} ${deployToString}`);
