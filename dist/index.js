@@ -4037,14 +4037,10 @@ function main() {
             const createReleaseInput = core.getInput("CREATE_RELEASE", { required: true });
             const octopusUrl = core.getInput("OCTOPUS_URL", { required: false });
             const octopusApiKey = core.getInput("OCTOPUS_APIKEY", { required: false });
-            const projectsInput = core.getInput("PROJECTS", { required: false });
-            const octopusProject = core.getInput("OCTOPUS_PROJECT", { required: false });
-            const deployTo = core.getInput("DEPLOY_TO", { required: false });
             const msTeamsWebhook = core.getInput("MS_TEAMS_WEBHOOK", { required: false });
+            const dbupProject = core.getInput("DBUP_PROJECT", { required: false });
             const context = github.context;
-            const repo = context.repo.repo;
-            const projectName = octopusProject ? octopusProject : repo;
-            const projects = projectsInput.split(",");
+            const projectName = context.repo.repo;
             const createRelease = (createReleaseInput.toLowerCase() === "true");
             if (createRelease && (!octopusUrl || !octopusApiKey)) {
                 throw new Error("Cannot create a release without OCTOPUS_URL and OCTOPUS_APIKEY being defined");
@@ -4061,22 +4057,23 @@ function main() {
                     throw new Error("Unable to get a version number");
                 }
                 const version = context.ref.replace("refs/tags/", "");
-                core.info(`🐙 Deploying projects ${projectsInput} (Version ${version}) to Octopus `);
+                core.info(`🐙 Deploying project ${projectName} (Version ${version}) to Octopus `);
                 core.info("Installing octopus cli...");
                 yield exec_1.exec(`dotnet tool install octopus.dotnet.cli --tool-path .`);
                 // generate a package for each project and push to Octopus
-                for (let i = 0; i < projects.length; i++) {
-                    const project = projects[i];
-                    const counter = `(${i}/${projects.length})`;
-                    core.info(project);
-                    core.info(`${counter} Packing...`);
-                    yield exec_1.exec(`.\\dotnet-octo pack --id=${project} --outFolder=${project}\\artifacts --basePath=${project}\\output --version=${version}`);
-                    core.info(`${counter} Push to Octopus...`);
-                    yield exec_1.exec(`.\\dotnet-octo push --package=${project}\\artifacts\\${project}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+                if (dbupProject) {
+                    core.info(`Deploying DbUp project: ${dbupProject}`);
+                    yield exec_1.exec(`.\\dotnet-octo pack --id=${dbupProject} --outFolder=${dbupProject}\\artifacts --basePath=${dbupProject}\\output --version=${version}`);
+                    core.info(`Push ${dbupProject} to Octopus...`);
+                    yield exec_1.exec(`.\\dotnet-octo push --package=${dbupProject}\\artifacts\\${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
                 }
+                core.info(projectName);
+                core.info(`Deploying project: ${projectName}`);
+                yield exec_1.exec(`.\\dotnet-octo pack --id=${projectName} --outFolder=${projectName}\\artifacts --basePath=\\ --version=${version}`);
+                core.info(`Push ${projectName} to Octopus...`);
+                yield exec_1.exec(`.\\dotnet-octo push --package=${projectName}\\artifacts\\${projectName}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
                 core.info("Creating Release...");
-                const deployToString = deployTo ? `--deployTo=${deployTo}` : "";
-                yield exec_1.exec(`.\\dotnet-octo create-release --project=${projectName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey} ${deployToString}`);
+                yield exec_1.exec(`.\\dotnet-octo create-release --project=${projectName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
                 if (msTeamsWebhook) {
                     sendNotification_1.sendTeamsNotification(projectName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
                 }

@@ -1,26 +1,20 @@
-name: 'Dotnet Core CI + Octopus Deploy'
-description: 'GitHub Action to deploy a DotNet Framework solution Octopus'
+name: 'Dotnet Core CI + Octopus Deploy Docker Container'
+description: 'GitHub Action to deploy a DotNet Framework solution Octopus as a Docker Container'
 inputs:
   CREATE_RELEASE:  
     description: 'If true, this build will be sent to Octopus, otherwise it will only be tested'
     required: true
-  PROJECTS:
-    description: 'e.g. MyProject or MyProject,MyOtherProject, must be included if CREATE_RELEASE is true'
-    required: false
   OCTOPUS_URL:  
     description: 'Octopus url'
     required: false
   OCTOPUS_APIKEY:  
     description: 'Api Key'
     required: false
-  OCTOPUS_PROJECT:  
-    description: 'The Octopus project that will be deployed to'
-    required: false 
-  DEPLOY_TO:  
-    description: 'If set, Octopus will attempt to auomtatically deploy to this environment'
-    required: false
   MS_TEAMS_WEBHOOK:  
     description: 'If set, A MS Teams notification will be sent to this webhook'
+    required: false
+  DBUP_PROJECT:
+    description: 'Name of DbUp project if required'
     required: false
 runs:
   using: "node12"
