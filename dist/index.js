@@ -4069,7 +4069,7 @@ function main() {
                 }
                 core.info(projectName);
                 core.info(`Deploying project: ${projectName}`);
-                yield exec_1.exec(`.\\dotnet-octo pack --id=${projectName} --outFolder=${projectName}\\artifacts --basePath=\\ --version=${version}`);
+                yield exec_1.exec(`.\\dotnet-octo pack --id=${projectName} --outFolder=${projectName}\\artifacts --basePath=. --version=${version}`);
                 core.info(`Push ${projectName} to Octopus...`);
                 yield exec_1.exec(`.\\dotnet-octo push --package=${projectName}\\artifacts\\${projectName}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
                 core.info("Creating Release...");
