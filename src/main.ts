@@ -42,7 +42,7 @@ async function main() {
 
 			core.info(projectName);
 			core.info(`Deploying project: ${projectName}`);
-			await exec(`.\\dotnet-octo pack --id=${projectName} --outFolder=${projectName}\\artifacts --basePath=\\ --version=${version}`);
+			await exec(`.\\dotnet-octo pack --id=${projectName} --outFolder=${projectName}\\artifacts --basePath=. --version=${version}`);
 			core.info(`Push ${projectName} to Octopus...`);
 			await exec(`.\\dotnet-octo push --package=${projectName}\\artifacts\\${projectName}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
 
