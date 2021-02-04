@@ -16,6 +16,18 @@ inputs:
   DBUP_PROJECT:
     description: 'Name of DbUp project if required'
     required: false
+  DOCKER_PROJECT:
+    description: 'Name of Docker Project to push to registry'
+    required: true
+  REGISTRY_HOST:
+    description: 'Name of Docker registry host to push to'
+    required: true
+  REGISTRY_USERNAME:
+    description: 'Username for docker registry'
+    required: true
+  REGISTRY_PASSWORD:
+    description: 'Password for docker registry user'
+    required: true
 runs:
   using: "node12"
   main: "dist/index.js"

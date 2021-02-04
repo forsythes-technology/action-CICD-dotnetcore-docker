@@ -11,11 +11,18 @@ async function main() {
 		const octopusApiKey: string = core.getInput("OCTOPUS_APIKEY", { required: false });
 		const msTeamsWebhook: string = core.getInput("MS_TEAMS_WEBHOOK", { required: false });
 		const dbupProject: string = core.getInput("DBUP_PROJECT", { required: false });
+		const dockerProject: string = core.getInput("DOCKER_PROJECT", { required: true });
+		const registryHost: string = core.getInput("REGISTRY_HOST", { required: true });
+		const registryUsername: string = core.getInput("REGISTRY_USERNAME", { required: true });
+		const registryPassword: string = core.getInput("REGISTRY_PASSWORD", { required: true });
 		const context = github.context;
-		const projectName = context.repo.repo;
+		const repoName = context.repo.repo;
 		const createRelease = (createReleaseInput.toLowerCase() === "true");
 		if (createRelease && (!octopusUrl || !octopusApiKey)) {
 			throw new Error("Cannot create a release without OCTOPUS_URL and OCTOPUS_APIKEY being defined");
+		}
+		if (createRelease && (!dockerProject || !registryHost || !registryUsername || !registryPassword)) {
+			throw new Error("Cannot push to docker registry without DOCKER_PROJECT, REGISTRY_HOST, REGISTRY_USERNAME and REGISTRY_PASSWORD being defined");
 		}
 		core.info(`Building solution (ref: ${context.ref})...`);
 		core.info("Build...");
@@ -29,7 +36,7 @@ async function main() {
 				throw new Error("Unable to get a version number");
 			}
 			const version = context.ref.replace("refs/tags/", "");
-			core.info(`🐙 Deploying project ${projectName} (Version ${version}) to Octopus `);
+			core.info(`🐙 Deploying project ${repoName} (Version ${version}) to Octopus `);
 			core.info("Installing octopus cli...");
 			await exec(`dotnet tool install octopus.dotnet.cli --tool-path .`);
 			// generate a package for each project and push to Octopus
@@ -40,16 +47,22 @@ async function main() {
 				await exec(`.\\dotnet-octo push --package=${dbupProject}\\artifacts\\${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
 			}
 
-			core.info(projectName);
-			core.info(`Deploying project: ${projectName}`);
-			await exec(`.\\dotnet-octo pack --id=${projectName} --outFolder=${projectName}\\artifacts --basePath=. --version=${version}`);
-			core.info(`Push ${projectName} to Octopus...`);
-			await exec(`.\\dotnet-octo push --package=${projectName}\\artifacts\\${projectName}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+			core.info(dockerProject);
+			core.info(`Building Docker Image: ${repoName}`);
+			await exec(`docker build -f .\\${dockerProject}\\Dockerfile -t ${repoName} .`);
+			core.info(`Tagging Docker Image: ${registryHost}/${repoName}`);
+			const imageTag = `${registryHost}/${repoName}:${version}`;
+			await exec(`docker tag ${repoName} ${imageTag}`);
+			core.info(`Login to registry: ${registryHost} with ${registryUsername}`);
+			await exec(`docker login ${registryHost} -u ${registryUsername} -p ${registryPassword}`);
+			core.info(`Push to registry: ${imageTag}`);
+			await exec(`docker push ${imageTag}`);
+			core.info(`Push complete`);
 
 			core.info("Creating Release...");
-			await exec(`.\\dotnet-octo create-release --project=${projectName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+			await exec(`.\\dotnet-octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
 			if (msTeamsWebhook) {
-				sendTeamsNotification(projectName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
+				sendTeamsNotification(repoName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
 			}
 		}
 		core.info("✅ complete");
