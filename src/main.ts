@@ -38,13 +38,13 @@ async function main() {
 			const version = context.ref.replace("refs/tags/", "");
 			core.info(`🐙 Deploying project ${repoName} (Version ${version}) to Octopus `);
 			core.info("Installing octopus cli...");
-			await exec(`dotnet tool install octopus.dotnet.cli --tool-path .`);
+			await exec(`dotnet tool install Octopus.DotNet.Cli --global`);
 			// generate a package for each project and push to Octopus
 			if (dbupProject) {
 				core.info(`Deploying DbUp project: ${dbupProject}`);
-				await exec(`dotnet-octo pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
+				await exec(`dotnet octo pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
 				core.info(`Push ${dbupProject} to Octopus...`);
-				await exec(`dotnet-octo push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+				await exec(`dotnet octo push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
 			}
 
 			core.info(dockerProject);
@@ -60,7 +60,7 @@ async function main() {
 			core.info(`Push complete`);
 
 			core.info("Creating Release...");
-			await exec(`dotnet-octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+			await exec(`dotnet octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
 			if (msTeamsWebhook) {
 				sendTeamsNotification(repoName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
 			}
