@@ -28,6 +28,9 @@ inputs:
   REGISTRY_PASSWORD:
     description: 'Password for docker registry user'
     required: true
+  TARGET_PLATFORM:
+    description: 'Specify dotnet platform for dbup project (defaults to win-x64)'
+    required: false
 runs:
   using: "node12"
   main: "dist/index.js"

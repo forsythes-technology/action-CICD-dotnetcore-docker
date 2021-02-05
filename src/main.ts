@@ -15,9 +15,11 @@ async function main() {
 		const registryHost: string = core.getInput("REGISTRY_HOST", { required: true });
 		const registryUsername: string = core.getInput("REGISTRY_USERNAME", { required: true });
 		const registryPassword: string = core.getInput("REGISTRY_PASSWORD", { required: true });
+		let targetPlatform: string = core.getInput("TARGET_PLATFORM", { required: false });
 		const context = github.context;
 		const repoName = context.repo.repo;
 		const createRelease = (createReleaseInput.toLowerCase() === "true");
+		if (!targetPlatform) targetPlatform = "win-x64";
 		if (createRelease && (!octopusUrl || !octopusApiKey)) {
 			throw new Error("Cannot create a release without OCTOPUS_URL and OCTOPUS_APIKEY being defined");
 		}
@@ -30,7 +32,7 @@ async function main() {
 		core.info("Test...");
 		await exec(`dotnet test`);
 		core.info("Publish...");
-		await exec(`dotnet publish -p:PublishDir=output -c Release`);
+		await exec(`dotnet publish -r ${targetPlatform} -p:PublishDir=output -c Release`);
 		if (createRelease) { // Build, pack and release
 			if (context.ref.indexOf("refs/tags/") === -1) {
 				throw new Error("Unable to get a version number");
