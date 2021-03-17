@@ -4057,6 +4057,7 @@ function main() {
             }
             core.info("Installing octopus cli...");
             yield exec_1.exec(`dotnet tool install Octopus.DotNet.Cli --global`);
+            yield exec_1.exec(`echo $HOME`);
             core.info(`Building solution (ref: ${context.ref})...`);
             core.info("Build...");
             yield exec_1.exec(`dotnet build`);
@@ -4073,9 +4074,9 @@ function main() {
                 // generate a package for each project and push to Octopus
                 if (dbupProject) {
                     core.info(`Deploying DbUp project: ${dbupProject}`);
-                    yield exec_1.exec(`/$HOME/.dotnet/tools/dotnet-octo pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
+                    yield exec_1.exec(`dotnet octo pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
                     core.info(`Push ${dbupProject} to Octopus...`);
-                    yield exec_1.exec(`/$HOME/.dotnet/tools/dotnet-octo push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+                    yield exec_1.exec(`dotnet octo push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
                 }
                 core.info(dockerProject);
                 core.info(`Building Docker Image: ${repoName}`);
@@ -4089,7 +4090,7 @@ function main() {
                 yield exec_1.exec(`docker push ${imageTag}`);
                 core.info(`Push complete`);
                 core.info("Creating Release...");
-                yield exec_1.exec(`/$HOME/.dotnet/tools/dotnet-octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+                yield exec_1.exec(`dotnet octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
                 if (msTeamsWebhook) {
                     sendNotification_1.sendTeamsNotification(repoName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
                 }
