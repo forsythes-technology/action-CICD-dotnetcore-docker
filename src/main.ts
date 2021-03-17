@@ -27,7 +27,8 @@ async function main() {
 			throw new Error("Cannot push to docker registry without DOCKER_PROJECT, REGISTRY_HOST, REGISTRY_USERNAME and REGISTRY_PASSWORD being defined");
 		}
 		core.info("Installing octopus cli...");
-		await exec(`dotnet tool install Octopus.DotNet.Cli --global`);
+		await exec(`dotnet tool install Octopus.DotNet.Cli --global --version 7.4.4`);
+		await exec(`dotnet octo version`);
 		await exec(`echo $HOME`);
 		core.info(`Building solution (ref: ${context.ref})...`);
 		core.info("Build...");
