@@ -27,8 +27,9 @@ async function main() {
 			throw new Error("Cannot push to docker registry without DOCKER_PROJECT, REGISTRY_HOST, REGISTRY_USERNAME and REGISTRY_PASSWORD being defined");
 		}
 		core.info("Installing octopus cli...");
-		await exec(`dotnet tool install Octopus.DotNet.Cli --global`);
-		await exec(`dotnet octo version`);
+		await exec(`dotnet tool install Octopus.DotNet.Cli --tool-path ~/.dotnet/tools`);
+		const octo = "~/.dotnet/tools/dotnet-octo";
+		await exec(`${octo} version`);
 		await exec(`echo $HOME`);
 		core.info(`Building solution (ref: ${context.ref})...`);
 		core.info("Build...");
@@ -46,9 +47,9 @@ async function main() {
 			// generate a package for each project and push to Octopus
 			if (dbupProject) {
 				core.info(`Deploying DbUp project: ${dbupProject}`);
-				await exec(`dotnet octo pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
+				await exec(`${octo} pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
 				core.info(`Push ${dbupProject} to Octopus...`);
-				await exec(`dotnet octo push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+				await exec(`${octo} push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
 			}
 
 			core.info(dockerProject);
@@ -64,7 +65,7 @@ async function main() {
 			core.info(`Push complete`);
 
 			core.info("Creating Release...");
-			await exec(`dotnet octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+			await exec(`${octo} create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
 			if (msTeamsWebhook) {
 				sendTeamsNotification(repoName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
 			}

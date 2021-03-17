@@ -4056,8 +4056,9 @@ function main() {
                 throw new Error("Cannot push to docker registry without DOCKER_PROJECT, REGISTRY_HOST, REGISTRY_USERNAME and REGISTRY_PASSWORD being defined");
             }
             core.info("Installing octopus cli...");
-            yield exec_1.exec(`dotnet tool install Octopus.DotNet.Cli --global`);
-            yield exec_1.exec(`dotnet octo version`);
+            yield exec_1.exec(`dotnet tool install Octopus.DotNet.Cli --tool-path ~/.dotnet/tools`);
+            const octo = "~/.dotnet/tools/dotnet-octo";
+            yield exec_1.exec(`${octo} version`);
             yield exec_1.exec(`echo $HOME`);
             core.info(`Building solution (ref: ${context.ref})...`);
             core.info("Build...");
@@ -4075,9 +4076,9 @@ function main() {
                 // generate a package for each project and push to Octopus
                 if (dbupProject) {
                     core.info(`Deploying DbUp project: ${dbupProject}`);
-                    yield exec_1.exec(`dotnet octo pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
+                    yield exec_1.exec(`${octo} pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
                     core.info(`Push ${dbupProject} to Octopus...`);
-                    yield exec_1.exec(`dotnet octo push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+                    yield exec_1.exec(`${octo} push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
                 }
                 core.info(dockerProject);
                 core.info(`Building Docker Image: ${repoName}`);
@@ -4091,7 +4092,7 @@ function main() {
                 yield exec_1.exec(`docker push ${imageTag}`);
                 core.info(`Push complete`);
                 core.info("Creating Release...");
-                yield exec_1.exec(`dotnet octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+                yield exec_1.exec(`${octo} create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
                 if (msTeamsWebhook) {
                     sendNotification_1.sendTeamsNotification(repoName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
                 }
