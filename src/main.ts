@@ -27,8 +27,11 @@ async function main() {
 			throw new Error("Cannot push to docker registry without DOCKER_PROJECT, REGISTRY_HOST, REGISTRY_USERNAME and REGISTRY_PASSWORD being defined");
 		}
 		core.info("Installing octopus cli...");
-		await exec(`dotnet tool install Octopus.DotNet.Cli --global --version 7.4.4`);
-		await exec(`dotnet octo version`);
+		await exec(`sudo apt update && sudo apt install --no-install-recommends gnupg curl ca-certificates apt-transport-https && \
+curl -sSfL https://apt.octopus.com/public.key | sudo apt-key add - && \
+sudo sh -c "echo deb https://apt.octopus.com/ stable main > /etc/apt/sources.list.d/octopus.com.list" && \
+sudo apt update && sudo apt install octopuscli`);
+		await exec(`octo version`);
 		await exec(`echo $HOME`);
 		core.info(`Building solution (ref: ${context.ref})...`);
 		core.info("Build...");
@@ -46,9 +49,9 @@ async function main() {
 			// generate a package for each project and push to Octopus
 			if (dbupProject) {
 				core.info(`Deploying DbUp project: ${dbupProject}`);
-				await exec(`dotnet octo pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
+				await exec(`octo pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
 				core.info(`Push ${dbupProject} to Octopus...`);
-				await exec(`dotnet octo push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+				await exec(`octo push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
 			}
 
 			core.info(dockerProject);
