@@ -4055,12 +4055,7 @@ function main() {
             if (createRelease && (!dockerProject || !registryHost || !registryUsername || !registryPassword)) {
                 throw new Error("Cannot push to docker registry without DOCKER_PROJECT, REGISTRY_HOST, REGISTRY_USERNAME and REGISTRY_PASSWORD being defined");
             }
-            core.info("Installing octopus cli...");
-            yield exec_1.exec(`sudo apt update && sudo apt install --no-install-recommends gnupg curl ca-certificates apt-transport-https && \
-curl -sSfL https://apt.octopus.com/public.key | sudo apt-key add - && \
-sudo sh -c "echo deb https://apt.octopus.com/ stable main > /etc/apt/sources.list.d/octopus.com.list" && \
-sudo apt update && sudo apt install octopuscli`);
-            yield exec_1.exec(`octo version`);
+            yield exec_1.exec(`dotnet octo version`);
             yield exec_1.exec(`echo $HOME`);
             core.info(`Building solution (ref: ${context.ref})...`);
             core.info("Build...");
@@ -4078,9 +4073,9 @@ sudo apt update && sudo apt install octopuscli`);
                 // generate a package for each project and push to Octopus
                 if (dbupProject) {
                     core.info(`Deploying DbUp project: ${dbupProject}`);
-                    yield exec_1.exec(`octo pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
+                    yield exec_1.exec(`dotnet octo pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
                     core.info(`Push ${dbupProject} to Octopus...`);
-                    yield exec_1.exec(`octo push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+                    yield exec_1.exec(`dotnet octo push --package=${dbupProject}/artifacts/${dbupProject}.${version}.nupkg --server=${octopusUrl} --apiKey=${octopusApiKey}`);
                 }
                 core.info(dockerProject);
                 core.info(`Building Docker Image: ${repoName}`);
@@ -4094,7 +4089,7 @@ sudo apt update && sudo apt install octopuscli`);
                 yield exec_1.exec(`docker push ${imageTag}`);
                 core.info(`Push complete`);
                 core.info("Creating Release...");
-                yield exec_1.exec(`octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+                yield exec_1.exec(`dotnet octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
                 if (msTeamsWebhook) {
                     sendNotification_1.sendTeamsNotification(repoName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
                 }
