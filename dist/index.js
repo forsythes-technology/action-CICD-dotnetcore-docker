@@ -4094,7 +4094,7 @@ sudo apt update && sudo apt install octopuscli`);
                 yield exec_1.exec(`docker push ${imageTag}`);
                 core.info(`Push complete`);
                 core.info("Creating Release...");
-                yield exec_1.exec(`dotnet octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+                yield exec_1.exec(`octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
                 if (msTeamsWebhook) {
                     sendNotification_1.sendTeamsNotification(repoName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
                 }

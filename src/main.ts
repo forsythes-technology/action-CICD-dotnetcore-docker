@@ -67,7 +67,7 @@ sudo apt update && sudo apt install octopuscli`);
 			core.info(`Push complete`);
 
 			core.info("Creating Release...");
-			await exec(`dotnet octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
+			await exec(`octo create-release --project=${repoName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey}`);
 			if (msTeamsWebhook) {
 				sendTeamsNotification(repoName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
 			}
