@@ -4055,6 +4055,8 @@ function main() {
             if (createRelease && (!dockerProject || !registryHost || !registryUsername || !registryPassword)) {
                 throw new Error("Cannot push to docker registry without DOCKER_PROJECT, REGISTRY_HOST, REGISTRY_USERNAME and REGISTRY_PASSWORD being defined");
             }
+            core.info("Installing octopus cli...");
+            yield exec_1.exec(`dotnet tool install Octopus.DotNet.Cli --global`);
             core.info(`Building solution (ref: ${context.ref})...`);
             core.info("Build...");
             yield exec_1.exec(`dotnet build`);
@@ -4068,8 +4070,6 @@ function main() {
                 }
                 const version = context.ref.replace("refs/tags/", "");
                 core.info(`🐙 Deploying project ${repoName} (Version ${version}) to Octopus `);
-                core.info("Installing octopus cli...");
-                yield exec_1.exec(`dotnet tool install Octopus.DotNet.Cli --global`);
                 // generate a package for each project and push to Octopus
                 if (dbupProject) {
                     core.info(`Deploying DbUp project: ${dbupProject}`);
