@@ -4056,7 +4056,7 @@ function main() {
                 throw new Error("Cannot push to docker registry without DOCKER_PROJECT, REGISTRY_HOST, REGISTRY_USERNAME and REGISTRY_PASSWORD being defined");
             }
             core.info("Installing octopus cli...");
-            yield exec_1.exec(`dotnet tool install Octopus.DotNet.Cli --tool-path ~/.dotnet/tools`);
+            yield exec_1.exec(`dotnet tool install Octopus.DotNet.Cli --global`);
             yield exec_1.exec(`dotnet octo version`);
             yield exec_1.exec(`echo $HOME`);
             core.info(`Building solution (ref: ${context.ref})...`);
