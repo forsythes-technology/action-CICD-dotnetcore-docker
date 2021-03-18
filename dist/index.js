@@ -4058,15 +4058,11 @@ function main() {
             core.info("Installing octopus cli...");
             yield exec_1.exec(`dotnet tool install Octopus.DotNet.Cli --tool-path ~/.dotnet/tools`);
             const octo = "~/.dotnet/tools/dotnet-octo";
-            yield exec_1.exec(`${octo} version`);
-            yield exec_1.exec(`echo $HOME`);
             core.info(`Building solution (ref: ${context.ref})...`);
             core.info("Build...");
             yield exec_1.exec(`dotnet build`);
             core.info("Test...");
             yield exec_1.exec(`dotnet test`);
-            core.info("Publish...");
-            yield exec_1.exec(`dotnet publish -r ${targetPlatform} -p:PublishDir=output -c Release`);
             if (createRelease) { // Build, pack and release
                 if (context.ref.indexOf("refs/tags/") === -1) {
                     throw new Error("Unable to get a version number");
@@ -4075,6 +4071,8 @@ function main() {
                 core.info(`🐙 Deploying project ${repoName} (Version ${version}) to Octopus `);
                 // generate a package for each project and push to Octopus
                 if (dbupProject) {
+                    core.info("Publish...");
+                    yield exec_1.exec(`dotnet publish -r ${targetPlatform} -p:PublishDir=output -c Release ${dbupProject}/${dbupProject}.csproj`);
                     core.info(`Deploying DbUp project: ${dbupProject}`);
                     yield exec_1.exec(`${octo} pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
                     core.info(`Push ${dbupProject} to Octopus...`);

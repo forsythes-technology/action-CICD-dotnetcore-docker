@@ -29,15 +29,11 @@ async function main() {
 		core.info("Installing octopus cli...");
 		await exec(`dotnet tool install Octopus.DotNet.Cli --tool-path ~/.dotnet/tools`);
 		const octo = "~/.dotnet/tools/dotnet-octo";
-		await exec(`${octo} version`);
-		await exec(`echo $HOME`);
 		core.info(`Building solution (ref: ${context.ref})...`);
 		core.info("Build...");
 		await exec(`dotnet build`);
 		core.info("Test...");
 		await exec(`dotnet test`);
-		core.info("Publish...");
-		await exec(`dotnet publish -r ${targetPlatform} -p:PublishDir=output -c Release`);
 		if (createRelease) { // Build, pack and release
 			if (context.ref.indexOf("refs/tags/") === -1) {
 				throw new Error("Unable to get a version number");
@@ -46,6 +42,8 @@ async function main() {
 			core.info(`🐙 Deploying project ${repoName} (Version ${version}) to Octopus `);
 			// generate a package for each project and push to Octopus
 			if (dbupProject) {
+				core.info("Publish...");
+				await exec(`dotnet publish -r ${targetPlatform} -p:PublishDir=output -c Release ${dbupProject}/${dbupProject}.csproj`);
 				core.info(`Deploying DbUp project: ${dbupProject}`);
 				await exec(`${octo} pack --id=${dbupProject} --outFolder=${dbupProject}/artifacts --basePath=${dbupProject}/output --version=${version}`);
 				core.info(`Push ${dbupProject} to Octopus...`);
